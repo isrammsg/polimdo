@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// generator client {
+//   provider = "prisma-client-js"
+//   output   = "../generated/prisma"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Jurusan {
+  id             Int      @id @default(autoincrement())
+  nama_jurusan   String
+  ketua_jurusan  String
+  users          User[]
+  prodis         Prodi[]
+}
+
+model Prodi {
+  id            Int     @id @default(autoincrement())
+  nama_prodi    String
+  ketua_prodi   String
+  jurusanId     Int
+  jurusan       Jurusan @relation(fields: [jurusanId], references: [id])
+  users         User[]
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  kode      String  @unique
+  nama      String
+  no_telp   String
+  jurusanId Int
+  prodiId   Int
+  jurusan   Jurusan @relation(fields: [jurusanId], references: [id])
+  prodi     Prodi   @relation(fields: [prodiId], references: [id])
+  ketuaDari Kegiatan[] @relation("KetuaKegiatan")
+  anggotaDari KegiatanAnggota[]
+}
+
+model Skema{
+  id Int @id @default(autoincrement())
+  nama String
+  kategori String
+  kegiatan Kegiatan[]
+}
+
+model Kegiatan{
+  id Int @id @default(autoincrement())
+  judul String
+  kategori String
+  abstrak String @db.Text
+  skemaId Int
+  skema Skema @relation(fields: [skemaId],references: [id])
+  ketuaId Int
+  ketua User @relation("KetuaKegiatan",fields: [ketuaId],references: [id])
+  anggota KegiatanAnggota[]
+}
+
+model KegiatanAnggota{
+  id Int @id @default(autoincrement())
+  userId Int
+  user User @relation(fields: [userId],references: [id])
+  kegiatanId Int
+  kegiatan Kegiatan @relation(fields: [kegiatanId],references: [id])
+  peran String
+
+}
+
